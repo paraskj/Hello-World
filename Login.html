@@ -1,0 +1,157 @@
+<!doctype html>
+<head>
+  <title>SQL database with html5sql.js</title> 
+  <script type="text/javascript" src="scripts/jquery.min.js"></script>
+  <script type="text/javascript" src="scripts/html5sql.js"></script>
+   <script type="text/javascript" src="scripts/utils.js"></script>
+</head>
+
+<body>
+   <h1>HTML5 Demo App</h1>
+  <p>Enter your username and password</p>
+  <form>
+    <table>
+      <tr><td>Username:</td><td><input type="text" id="user" /></td></tr>
+      <tr><td>Password:</td><td><input type="password" id="password" /></td/tr>
+      <tr><td></td><td>
+        <input type="button" id="login" value="Login" />
+     
+        <input type="button" id="reset" value="Reset Database" />
+		
+      </tr></td> 
+    </table>
+	<ul id="successfullStatements"></ul>
+	
+	<p id="result">Not logged In</p>
+	
+  </form>  
+  
+  <script type="text/javascript">
+  
+    var gUser =""; // Global user name
+    
+	  console.log("Open SQL database");
+	  html5sql.openDatabase("Jobsdb", "Jobs Database", 1*1024*1024);	
+
+	 $("#login").click(function() 
+      {  
+		// console.log("Login pressed");
+        loginuser();
+		console.log(gUser + " " + Date());
+	 
+      });
+	  
+	  
+      $("#reset").click(function()
+      {
+		resetSQLDatabase();
+      });
+	  
+
+
+	function loginuser()
+    {
+	   gUser = "";
+	   
+	   localStorage.setItem("username", "");
+	
+	   var usr = document.getElementById("user").value.toLowerCase();
+	   var pwd = document.getElementById("password").value;
+	   
+	   var sql =  "Select * FROM Users WHERE LOWER(userid)='"+ usr +"' AND pwd='" + pwd + "';"
+
+	   if (usr == "" || pwd == "" ) // validate entry
+		{	document.getElementById("result").innerText = "Username and Password must be entered!";		
+			return	};	
+	   	  
+		   
+		  html5sql.process
+		  (
+			[ sql,],
+			function(transaction, results, rowsArray)
+			{
+				for(var i = 0; i < rowsArray.length; i++)		
+				{	gUser = rowsArray[i].userid;
+					console.log("Row " + i + " " + gUser);
+				}	 
+
+				 if (gUser != "" ) 
+				 {  //successful login
+					localStorage.setItem("username", gUser); // store for other pages	   
+					document.getElementById("result").innerText = "Welcome " + gUser ;
+				    window.location="jobs.html";
+				 }
+				 else
+				{ document.getElementById("result").innerText = "Invalid Username or Password" ;	}
+				},
+			function(error, statement)
+			{   console.log(error.message+" Occured while processing: "+statement);  }
+		  );
+    }; // end loginuser
+
+	function resetSQLDatabase(){
+	
+		// reset the sqllite database
+         console.log("Reset resetSQLDatabase");
+		
+        html5sql.process
+        (
+          [
+		    "DROP TABLE IF EXISTS Activities;",
+			"CREATE TABLE IF NOT EXISTS Activities (activityid TEXT PRIMARY KEY, name TEXT);",
+			"INSERT INTO Activities (activityid, name) VALUES ('a1','Survey');",
+			"INSERT INTO Activities (activityid, name) VALUES ('a2','Dig Hole');",
+			"INSERT INTO Activities (activityid, name) VALUES ('a3','Install');",
+			"INSERT INTO Activities (activityid, name) VALUES ('a4','Backfill');",
+			"INSERT INTO Activities (activityid, name) VALUES ('a5','Bodge it');",
+			"INSERT INTO Activities (activityid, name) VALUES ('a6','Leg it');",
+
+		    "DROP TABLE IF EXISTS Assets;",
+			"CREATE TABLE IF NOT EXISTS Assets (assetid TEXT PRIMARY KEY, name TEXT, lastupdated DATE DEFAULT (datetime('now','localtime'))  );",
+			"INSERT INTO Assets (assetid, name, lastupdated) VALUES ('a1','Asset One', (datetime('now','localtime')) );",
+			"INSERT INTO Assets (assetid, name, lastupdated) VALUES ('a2','Asset Two', (datetime('now','localtime')) );",
+			"INSERT INTO Assets (assetid, name, lastupdated) VALUES ('a3','Asset Three', null);",
+			"INSERT INTO Assets (assetid, name, lastupdated) VALUES ('a4','Asset Four', null );",
+			"INSERT INTO Assets (assetid, name, lastupdated) VALUES ('a5','Asset Five', null );",
+
+		    "DROP TABLE IF EXISTS Sites;",
+			"CREATE TABLE IF NOT EXISTS Sites (siteid TEXT PRIMARY KEY, name TEXT,  phone1 TEXT , phone2 TEXT, address TEXT , postcode TEXT);",
+			"INSERT INTO Sites (siteid, name, phone1 , phone2,address, postcode) VALUES ('one','Site one' ,'0','0','Somewhere','B4');",
+			"INSERT INTO Sites (siteid, name, phone1 , phone2, address, postcode) VALUES ('two','Site two','0','0','Somewhere','MK6');",
+			"INSERT INTO Sites (siteid, name, phone1 , phone2, address, postcode) VALUES ('three','Site three','0','0','somewhere','NN1');",			
+			"INSERT INTO Sites (siteid, name, phone1 , phone2, address, postcode) VALUES ('four','Site four','0','0','somewhere','N1');",		
+			
+            "DROP TABLE IF EXISTS Users;",
+			"CREATE TABLE IF NOT EXISTS Users (userid TEXT PRIMARY KEY, pwd TEXT, fullname TEXT);",
+			"INSERT INTO Users (userid,pwd, fullname ) VALUES ('fred','p4ss','Freddie');",
+			"INSERT INTO Users (userid,pwd, fullname ) VALUES ('gary','p4ss','Gazza');",
+			"INSERT INTO Users (userid,pwd, fullname ) VALUES ('jes','p4ssword','Jessie');",
+		
+			"DROP TABLE IF EXISTS Jobs;",
+            "CREATE TABLE IF NOT EXISTS Jobs (jobid INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, siteid TEXT, status TEXT, priority INTEGER, address TEXT, postcode TEXT, notes TEXT, assetid TEXT, dateraised DATE DEFAULT (datetime('now','localtime')) );",
+            "INSERT INTO Jobs (jobid, userid, status, siteid, priority, address, postcode, notes, assetid, dateraised) VALUES (1, 'fred','new' , 'one' ,3,'Fred address 1','F123','Here are the Notes for this job','a1',null);",
+            "INSERT INTO Jobs (jobid, userid, status, siteid, priority, address, postcode, notes, assetid, dateraised) VALUES (2, 'fred','new' , 'one', 2,'Fred address 2','G123','Here are the Notes for this job',null,null);",
+            "INSERT INTO Jobs (jobid, userid, status, siteid, priority, address, postcode, notes, assetid, dateraised) VALUES (3, 'fred','new' , 'one', 0,'Fred address 3','F123','Here are the Notes for this job',null,null);",
+            "INSERT INTO Jobs (jobid, userid, status, siteid, priority, address, postcode, notes, assetid, dateraised) VALUES (4, 'fred','new' , 'two', 5,'Fred address 4','G123','Here are the Notes for this job',null,null);",
+
+		    "DROP TABLE IF EXISTS JobActivities;",
+			"CREATE TABLE IF NOT EXISTS JobActivities (activityid TEXT, jobid INTEGER);",
+			"INSERT INTO JobActivities (jobid , activityid) VALUES (1,'a1');",
+			"INSERT INTO JobActivities (jobid , activityid) VALUES (1,'a2');",
+			"INSERT INTO JobActivities (jobid , activityid) VALUES (2,'a3');",	
+			"INSERT INTO JobActivities (jobid , activityid) VALUES (2,'a4');"	
+
+			],
+          function()
+          {
+            console.log("Dropped and created SQLLite database");
+          },
+          function(error, statement)
+          {
+            console.log(error.message+" Occured while processing: "+statement);
+          }
+        );
+}; // resetdb
+
+  </script>
+</body>
