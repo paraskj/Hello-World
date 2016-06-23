@@ -1,0 +1,171 @@
+	
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        <title>Jobs List</title>
+	    <script type="text/javascript" src="scripts/jquery.min.js"></script>
+	    <script type="text/javascript" src="scripts/html5sql.js"></script>
+		 <script type="text/javascript" src="scripts/utils.js"></script>
+    </head>
+    <body>
+	
+<style>
+table-layout {
+    text-align: center;
+    border: 1px solid blue;
+    border-collapse: collapse;
+    font-family:"Trebuchet MS";
+    margin: 0 auto 0;
+	background-color: green;
+}
+.table-layout td, .table-layout th {
+    border: 1px solid grey;
+    padding: 5px 5px 0;
+}
+.table-layout td {
+    text-align: left;
+	
+}
+.selected {
+    color: white;
+	background-color: blue;
+}
+
+col-header {
+    color: gray;
+	background-color: lightblue;
+}
+</style>
+	
+  <h2 id="jobshead"></h2>
+   <p>
+  <button type="button" onclick="tester()" >Refresh</button>
+  <button type="button" onclick="newjob()" >+ New Job</button>
+  <button type="button" onclick="editjob()" >Edit Job</button>
+  <button type="button" onclick="logout()" >Log out</button>
+   
+  </p>
+  
+
+	<table onclick="table_highlight_row()" id="myTable" border=2   >
+		<tr  style="text-align:center;background-color:lightblue">
+		<td class="table-layout">Job Id</td>
+		<td background-color="green">Priority</td>
+		<td>Status</td>
+		<td>Address</td>
+		<td>Post Code</td>
+		<td>Notes</td>
+	</table>
+<p id="selectedinfo"></p>
+<script>
+
+	var usr = localStorage.getItem("username");
+	
+	if (usr=="") {
+		console.log("Not logged in");
+		logout();
+	}
+	
+	document.getElementById("jobshead").innerHTML="Jobs for " + usr;
+	
+	loadjobs(usr);
+			 
+	window.onload = table_highlight_row;	 
+		 
+
+			
+function loadjobs(user) {
+
+	console.log("loadjobs " + user);
+	
+   	html5sql.openDatabase("Jobsdb", "Jobs Database", 1*1024*1024);	
+
+	var successfullStatements = $("#successfullStatements"),  errors = $("#errors");
+			
+	 html5sql.process
+      (
+        [
+          "SELECT * FROM Jobs WHERE userid='" + user + "'  ORDER BY priority;",
+        ],
+        function(transaction, results, rowsArray)
+        {
+			//filltable(rowsArray);
+			 fillJobsTable(rowsArray, document.getElementById("myTable"));
+        },
+        function(error, statement)
+        {   console.log(error.message+" Occured while processing: "+statement); }
+      );
+    }
+			
+function tester() 
+      {  
+	    console.log("Refresh click");
+		window.location="jobs.html";
+     }
+
+function newjob() 
+      {  
+	    console.log("New Job click");
+		localStorage.setItem("activeJobId", "");
+		window.location="jobdetails.html";
+     }
+
+function editjob() 
+      {  
+		console.log("Edit Job click");  
+		if ( localStorage.getItem("activeJobId")=="")
+		{  alert("Please select a row to edit"); }
+		else
+		{  window.location="jobdetails.html"; }
+     }
+	 
+function tableText(tableCell) {
+    
+    console.log("tableText");
+	//var table =document.getElementById('myTable');
+	//var cells = table.getElementsByTagName('td');
+	//console.log(cells);
+	table_highlight_row();
+	}
+
+function table_highlight_row() {
+    
+	console.log("table_highlight_row");
+	 
+	var table = document.getElementById('myTable');
+	var cells = table.getElementsByTagName('td');
+
+    for (var i = 0; i < cells.length; i++) {
+        // Take each cell
+        var cell = cells[i];
+        // do something on onclick event for cell
+        cell.onclick = function () {
+            // Get the row id where the cell exists
+            var rowId =  this.parentNode.rowIndex;
+			
+			if (rowId!=0) // exclude table header
+			{
+            var rowsNotSelected = table.getElementsByTagName('tr');
+            for (var row = 1; row < rowsNotSelected.length; row++) {
+                rowsNotSelected[row].style.backgroundColor = "";
+                rowsNotSelected[row].classList.remove('selected');
+            }
+            var rowSelected = table.getElementsByTagName('tr')[rowId];
+         
+            rowSelected.className += " selected";
+
+			var jobid = rowSelected.cells[0].innerHTML;
+			localStorage.setItem("activeJobId", jobid);
+            msg = 'The Job ID is: ' + jobid;
+            //msg += '\nThe cell value is: ' + this.innerHTML;
+			
+			document.getElementById("selectedinfo").innerHTML =msg;
+			}
+        }  //cell.onclick = function () {
+    }
+
+} //end of function
+
+        </script>
+    </body>
+</html>
