@@ -100,14 +100,14 @@ function loadjobs(user) {
 function tester() 
       {  
 	    console.log("Refresh click");
-		window.location="jobs.html";
+		window.location.href="jobs.html";
      }
 
 function newjob() 
       {  
 	    console.log("New Job click");
 		localStorage.setItem("activeJobId", "");
-		window.location="jobdetails.html";
+		window.location.href="jobdetails.html";
      }
 
 function editjob() 
@@ -116,7 +116,7 @@ function editjob()
 		if ( localStorage.getItem("activeJobId")=="")
 		{  alert("Please select a row to edit"); }
 		else
-		{  window.location="jobdetails.html"; }
+		{  window.location.href="jobdetails.html"; }
      }
 	 
 function tableText(tableCell) {

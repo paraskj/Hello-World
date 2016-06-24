@@ -7,7 +7,7 @@ function logout()
 	    console.log("Logout");
 		localStorage.setItem("username", "");
 		localStorage.setItem("activeJobId", "");
-		window.location="Login.html";
+		window.location.href="login.html";
      };
 	 
 function fillJobsTable(rowsArray,table) {		  

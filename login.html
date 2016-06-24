@@ -1,6 +1,6 @@
 <!doctype html>
 <head>
-  <title>SQL database with html5sql.js</title> 
+  <title>SQL db test #1</title> 
   <script type="text/javascript" src="scripts/jquery.min.js"></script>
   <script type="text/javascript" src="scripts/html5sql.js"></script>
    <script type="text/javascript" src="scripts/utils.js"></script>
@@ -42,7 +42,7 @@
       });
 	  
 	  
-      $("#reset").click(function()
+$("#reset").click(function()
       {
 		resetSQLDatabase();
       });
@@ -79,7 +79,8 @@
 				 {  //successful login
 					localStorage.setItem("username", gUser); // store for other pages	   
 					document.getElementById("result").innerText = "Welcome " + gUser ;
-				    window.location="jobs.html";
+				    //window.location="jobs.html";
+					window.location.href="jobs.html"
 				 }
 				 else
 				{ document.getElementById("result").innerText = "Invalid Username or Password" ;	}
@@ -92,7 +93,7 @@
 	function resetSQLDatabase(){
 	
 		// reset the sqllite database
-         console.log("Reset resetSQLDatabase");
+        console.log("Reset resetSQLDatabase");
 		
         html5sql.process
         (
@@ -155,8 +156,11 @@
 			],
           function()
           {
-            console.log("Dropped and created SQLLite database");
-          },
+            var msg = "Dropped and created SQLLite database";
+			console.log(msg);
+			document.getElementById("result").innerText = msg ;
+
+			},
           function(error, statement)
           {
             console.log(error.message+" Occured while processing: "+statement);
